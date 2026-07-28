@@ -1,13 +1,18 @@
-import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import Home from './components/Home';
 import Footer from './components/Footer';
+import Home from './components/Home';
+import JobDetails from './components/JobDetails';
+import './App.css';
 
 function App() {
   return (
-    <div style={{ backgroundColor: '#f9f9f9', minHeight: '100vh', fontFamily: 'Arial, sans-serif' }}>
+    <div className="app">
       <Navbar />
-      <Home />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/job/:id" element={<JobDetails />} />
+      </Routes>
       <Footer />
     </div>
   );

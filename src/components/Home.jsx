@@ -1,52 +1,49 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const Home = () => {
-  const jobs = [
-    { id: 1, title: "React Developer", company: "TechCorp", location: "Dhaka (Remote)" },
-    { id: 2, title: "UI/UX Designer", company: "DesignStudio", location: "Chittagong" },
-    { id: 3, title: "Frontend Intern", company: "SoftMind", location: "Sylhet" }
-  ];
+function Home() {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleApply = (jobTitle, companyName) => {
-    alert(`Successfully Applied for "${jobTitle}" at ${companyName}!`);
-  };
+  useEffect(() => {
+    fetch('http://localhost:5001/jobs')
+      .then((res) => res.json())
+      .then((data) => {
+        setJobs(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching jobs:', error);
+        setLoading(false);
+      });
+  }, []);
 
   return (
-    <div style={{ padding: '40px 20px', maxWidth: '800px', margin: '0 auto', marginBottom: '80px' }}>
-      <h1 style={{ textAlign: 'center', color: '#2c3e50' }}>Find Your Dream Job</h1>
-      <p style={{ textAlign: 'center', color: '#7f8c8d' }}>Browse the latest job openings below</p>
-      
-      <div style={{ display: 'grid', gap: '20px', marginTop: '30px' }}>
-        {jobs.map((job) => (
-          <div key={job.id} style={{
-            padding: '20px',
-            border: '1px solid #e0e0e0',
-            borderRadius: '8px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-            backgroundColor: '#ffffff'
-          }}>
-            <h3 style={{ margin: '0 0 10px 0', color: '#2980b9' }}>{job.title}</h3>
-            <p style={{ margin: '5px 0', fontWeight: 'bold' }}>{job.company}</p>
-            <p style={{ margin: '5px 0', color: '#7f8c8d' }}>📍 {job.location}</p>
-            <button 
-              onClick={() => handleApply(job.title, job.company)}
-              style={{
-                marginTop: '10px',
-                padding: '8px 15px',
-                backgroundColor: '#2ecc71',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer'
-              }}
-            >
-              Apply Now
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="home">
+      <header className="hero">
+        <h1>Find Your Dream Job</h1>
+        <p>Browse the latest job openings below</p>
+      </header>
+
+      <main className="job-list">
+        {loading ? (
+          <p style={{ textAlign: 'center' }}>Loading jobs from server...</p>
+        ) : (
+          jobs.map((job) => (
+            <div key={job.id} className="job-card">
+              <h3>{job.title}</h3>
+              <p className="company">{job.company}</p>
+              <p className="location">📍 {job.location}</p>
+              {job.salary && <p className="salary">💰 {job.salary}</p>}
+              <Link to={`/job/${job.id}`}>
+                <button className="apply-btn">View Details</button>
+              </Link>
+            </div>
+          ))
+        )}
+      </main>
     </div>
   );
-};
+}
 
 export default Home;
