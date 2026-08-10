@@ -92,6 +92,7 @@ const Home = () => {
               <div style={{ marginTop: '20px' }}>
                 <Link
                   to={`/jobs/${job._id || job.id}`}
+                  state={{ job }}
                   style={{
                     display: 'block',
                     width: '100%',
@@ -101,7 +102,8 @@ const Home = () => {
                     borderRadius: '8px',
                     textDecoration: 'none',
                     fontWeight: '600',
-                    fontSize: '14px'
+                    fontSize: '14px',
+                    textAlign: 'center'
                   }}
                 >
                   View Details

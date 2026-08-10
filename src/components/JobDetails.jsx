@@ -1,46 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React from 'react';
+import { useLocation, Link } from 'react-router-dom';
 
 const JobDetails = () => {
-  const { id } = useParams();
-  const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (id) {
-      // Live Render Backend API
-      fetch(`https://job-portal-1-md06.onrender.com/jobs/${id}`)
-        .then((res) => res.json())
-        .then((data) => {
-          // Backend Response Array or Object Handling
-          if (Array.isArray(data)) {
-            setJob(data[0]);
-          } else {
-            setJob(data);
-          }
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error('Error fetching job details:', err);
-          setLoading(false);
-        });
-    }
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px' }}>
-        Loading job details...
-      </div>
-    );
-  }
+  const location = useLocation();
+  const job = location.state?.job;
 
   if (!job) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        <h2>Job details not found!</h2>
-        <Link to="/" style={{ color: '#2563eb', textDecoration: 'none' }}>
-          Back to Home
+      <div style={{ textAlign: 'center', padding: '60px', fontFamily: 'sans-serif' }}>
+        <h2>Job details not available!</h2>
+        <p style={{ color: '#64748b' }}>Please go back and select a job from the home page.</p>
+        <Link to="/" style={{ color: '#2563eb', fontWeight: 'bold', textDecoration: 'none' }}>
+          ← Back to Home
         </Link>
       </div>
     );
@@ -56,7 +27,7 @@ const JobDetails = () => {
         <h1 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>{job.title}</h1>
         <p style={{ fontSize: '18px', color: '#2563eb', fontWeight: 'bold', margin: '0 0 20px 0' }}>{job.company}</p>
 
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', color: '#64748b', fontSize: '15px' }}>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', color: '#64748b', fontSize: '15px', flexWrap: 'wrap' }}>
           <span>📍 {job.location}</span>
           {job.salary && <span>💰 {job.salary}</span>}
           {job.jobType && <span>💼 {job.jobType}</span>}
@@ -66,15 +37,8 @@ const JobDetails = () => {
 
         <h3 style={{ color: '#1e293b', marginBottom: '10px' }}>Job Description</h3>
         <p style={{ color: '#475569', lineHeight: '1.6' }}>
-          {job.description || 'No detailed description available for this position.'}
+          {job.description || 'We are looking for a dedicated professional to join our dynamic team. Responsible for core development and collaborating with cross-functional teams.'}
         </p>
-
-        {job.requirements && (
-          <>
-            <h3 style={{ color: '#1e293b', marginTop: '20px', marginBottom: '10px' }}>Requirements</h3>
-            <p style={{ color: '#475569', lineHeight: '1.6' }}>{job.requirements}</p>
-          </>
-        )}
 
         <button
           onClick={() => alert('Application Submitted Successfully!')}
