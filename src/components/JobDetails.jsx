@@ -7,7 +7,7 @@ const JobDetails = () => {
 
   useEffect(() => {
     if (id) {
-      // Render backend live URL
+  
       fetch(`https://job-portal-1-md06.onrender.com/jobs/${id}`)
         .then((res) => res.json())
         .then((data) => setJob(data))
