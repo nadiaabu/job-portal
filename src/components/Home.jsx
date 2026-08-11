@@ -6,7 +6,6 @@ const Home = () => {
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    // Render Live Backend URL
     fetch('https://job-portal-1-md06.onrender.com/jobs')
       .then((res) => res.json())
       .then((data) => setJobs(data))

@@ -1,29 +1,41 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
   return (
-    <nav className="bg-[#0B132B] text-white px-8 py-3.5 flex items-center justify-between shadow-md">
-      {/* Logo */}
-      <div className="text-xl font-bold tracking-wide flex items-center gap-2">
-        <span>💼</span> Job Portal
-      </div>
-
-      {/* Search Input */}
-      <div className="w-1/3">
-        <input
-          type="text"
-          placeholder="Search jobs..."
-          className="w-full px-4 py-1.5 rounded-full text-black bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      {/* Navigation Links & Button */}
-      <div className="flex items-center space-x-6 text-sm font-medium">
-        <a href="/" className="hover:text-gray-300">Home</a>
-        <a href="/jobs" className="hover:text-gray-300">All Jobs</a>
-        <button className="bg-[#D9381E] hover:bg-red-700 text-white text-xs font-semibold px-4 py-2 rounded-md transition">
-          SignUp/Signin
-        </button>
+    <nav style={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: '16px 40px',
+      backgroundColor: '#0f172a',
+      color: '#ffffff',
+      fontFamily: 'sans-serif'
+    }}>
+      <h2 style={{ margin: 0, fontSize: '22px' }}>
+        <Link to="/" style={{ color: '#ffffff', textDecoration: 'none', fontWeight: 'bold' }}>
+          💼 Job Portal
+        </Link>
+      </h2>
+      
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+        <Link to="/" style={{ color: '#e2e8f0', textDecoration: 'none', fontWeight: '500' }}>
+          Home
+        </Link>
+        <Link
+          to="/add-job"
+          style={{
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            textDecoration: 'none',
+            fontWeight: 'bold',
+            fontSize: '14px'
+          }}
+        >
+          + Add Job
+        </Link>
       </div>
     </nav>
   );
