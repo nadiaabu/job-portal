@@ -19,19 +19,15 @@ const AddJob = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch('https://job-portal-1-md06.onrender.com/jobs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.insertedId || data._id) {
-          alert('Job posted successfully!');
-          navigate('/');
-        }
-      })
-      .catch((err) => console.error('Error adding job:', err));
+    const newJob = { ...formData, _id: Date.now().toString() };
+
+    // লোকাল স্টোরেজে সেভ করা
+    const existingJobs = JSON.parse(localStorage.getItem('user_added_jobs')) || [];
+    const updatedJobs = [newJob, ...existingJobs];
+    localStorage.setItem('user_added_jobs', JSON.stringify(updatedJobs));
+
+    alert('Job published successfully!');
+    navigate('/all-jobs');
   };
 
   return (

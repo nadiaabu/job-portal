@@ -1,31 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+
+const defaultJobs = [
+  {
+    _id: '1',
+    title: 'Backend Node.js Engineer',
+    company: 'CodeLab',
+    location: 'Sylhet (Hybrid)',
+    salary: '$70,000/yr'
+  },
+  {
+    _id: '2',
+    title: 'UI/UX Designer',
+    company: 'DesignStudio',
+    location: 'Chittagong',
+    salary: '$45,000/yr'
+  },
+  {
+    _id: '3',
+    title: 'React Developer',
+    company: 'TechCorp',
+    location: 'Dhaka (Remote)',
+    salary: '$60,000/yr'
+  }
+];
+
 const Home = () => {
-  const [jobs, setJobs] = useState([]);
+  const [jobs, setJobs] = useState(defaultJobs);
 
   useEffect(() => {
     fetch('https://job-portal-1-md06.onrender.com/jobs')
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setJobs(data);
-        } else {
-          setJobs([]);
         }
       })
       .catch((err) => {
         console.error('Error fetching jobs:', err);
-        setJobs([]);
       });
   }, []);
 
-  // শুধুমাত্র প্রথম ৩টি জব ফিল্টার করে নেওয়া
   const featuredJobs = jobs.slice(0, 3);
 
   return (
     <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
-      {/* Banner */}
       <div
         style={{
           borderRadius: '16px',
@@ -50,75 +70,65 @@ const Home = () => {
         Latest Job Openings
       </h2>
 
-      {/* Featured Jobs Grid (Top 3) */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' }}>
-        {featuredJobs.length > 0 ? (
-          featuredJobs.map((job) => (
-            <div
-              key={job._id || job.id}
-              style={{
-                backgroundColor: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: '12px',
-                padding: '20px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between'
-              }}
-            >
-              <div>
-                <h3 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>{job.title}</h3>
-                <p style={{ color: '#2563eb', fontWeight: 'bold', margin: '0 0 10px 0' }}>{job.company}</p>
-                <p style={{ color: '#64748b', fontSize: '14px', margin: '4px 0' }}>📍 {job.location}</p>
-                {job.salary && <p style={{ color: '#64748b', fontSize: '14px', margin: '4px 0' }}>💰 {job.salary}</p>}
-              </div>
-
-              <Link
-                to={`/jobs/${job._id || job.id}`}
-                style={{
-                  display: 'block',
-                  textAlign: 'center',
-                  backgroundColor: '#0f172a',
-                  color: '#ffffff',
-                  padding: '10px 0',
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                  fontWeight: 'bold',
-                  marginTop: '15px'
-                }}
-              >
-                View Details
-              </Link>
-            </div>
-          ))
-        ) : (
-          <p style={{ textAlign: 'center', gridColumn: '1 / -1', color: '#64748b' }}>
-            No jobs available right now.
-          </p>
-        )}
-      </div>
-
-      {/* See All Jobs Button */}
-      {jobs.length > 3 && (
-        <div style={{ textAlign: 'center', marginTop: '35px' }}>
-          <Link
-            to="/all-jobs"
+        {featuredJobs.map((job) => (
+          <div
+            key={job._id || job.id}
             style={{
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              padding: '12px 28px',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              display: 'inline-block'
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '12px',
+              padding: '20px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
             }}
           >
-            See All Jobs ({jobs.length})
-          </Link>
-        </div>
-      )}
+            <div>
+              <h3 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>{job.title}</h3>
+              <p style={{ color: '#2563eb', fontWeight: 'bold', margin: '0 0 10px 0' }}>{job.company}</p>
+              <p style={{ color: '#64748b', fontSize: '14px', margin: '4px 0' }}>📍 {job.location}</p>
+              {job.salary && <p style={{ color: '#64748b', fontSize: '14px', margin: '4px 0' }}>💰 {job.salary}</p>}
+            </div>
+
+            <Link
+              to={`/jobs/${job._id || job.id}`}
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                backgroundColor: '#0f172a',
+                color: '#ffffff',
+                padding: '10px 0',
+                borderRadius: '6px',
+                textDecoration: 'none',
+                fontWeight: 'bold',
+                marginTop: '15px'
+              }}
+            >
+              View Details
+            </Link>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ textAlign: 'center', marginTop: '35px' }}>
+        <Link
+          to="/all-jobs"
+          style={{
+            backgroundColor: '#2563eb',
+            color: '#ffffff',
+            padding: '12px 28px',
+            borderRadius: '8px',
+            textDecoration: 'none',
+            fontWeight: 'bold',
+            fontSize: '16px',
+            display: 'inline-block'
+          }}
+        >
+          See All Jobs
+        </Link>
+      </div>
     </div>
   );
 };
