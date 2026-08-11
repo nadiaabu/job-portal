@@ -22,6 +22,9 @@ const Navbar = () => {
         <Link to="/" style={{ color: '#e2e8f0', textDecoration: 'none', fontWeight: '500' }}>
           Home
         </Link>
+        <Link to="/all-jobs" style={{ color: '#e2e8f0', textDecoration: 'none', fontWeight: '500' }}>
+          All Jobs
+        </Link>
         <Link
           to="/add-job"
           style={{

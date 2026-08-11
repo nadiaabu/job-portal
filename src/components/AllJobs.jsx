@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const Home = () => {
+const AllJobs = () => {
   const [jobs, setJobs] = useState([]);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetch('https://job-portal-1-md06.onrender.com/jobs')
@@ -20,40 +21,41 @@ const Home = () => {
       });
   }, []);
 
-  // শুধুমাত্র প্রথম ৩টি জব ফিল্টার করে নেওয়া
-  const featuredJobs = jobs.slice(0, 3);
+  const filteredJobs = jobs.filter((job) =>
+    job.title?.toLowerCase().includes(search.toLowerCase()) ||
+    job.company?.toLowerCase().includes(search.toLowerCase()) ||
+    job.location?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
-      {/* Banner */}
-      <div
-        style={{
-          borderRadius: '16px',
-          marginBottom: '40px',
-          height: '240px',
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          color: '#ffffff',
-          textAlign: 'center'
-        }}
-      >
-        <h1 style={{ fontSize: '36px', margin: '0 0 10px 0' }}>Find Your Dream Job!</h1>
-        <p style={{ fontSize: '16px', opacity: 0.9 }}>Discover top career opportunities today.</p>
-      </div>
-
-      <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#1e293b' }}>
-        Latest Job Openings
+    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '30px 20px', fontFamily: 'sans-serif' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px', color: '#1e293b' }}>
+        All Available Jobs
       </h2>
 
-      {/* Featured Jobs Grid (Top 3) */}
+      {/* Search Input */}
+      <div style={{ maxWidth: '500px', margin: '0 auto 35px auto' }}>
+        <input
+          type="text"
+          placeholder="Search by job title, company, or location..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '12px 16px',
+            borderRadius: '8px',
+            border: '1px solid #cbd5e1',
+            fontSize: '15px',
+            outline: 'none',
+            boxSizing: 'border-box'
+          }}
+        />
+      </div>
+
+      {/* Jobs Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' }}>
-        {featuredJobs.length > 0 ? (
-          featuredJobs.map((job) => (
+        {filteredJobs.length > 0 ? (
+          filteredJobs.map((job) => (
             <div
               key={job._id || job.id}
               style={{
@@ -94,33 +96,12 @@ const Home = () => {
           ))
         ) : (
           <p style={{ textAlign: 'center', gridColumn: '1 / -1', color: '#64748b' }}>
-            No jobs available right now.
+            No jobs match your search.
           </p>
         )}
       </div>
-
-      {/* See All Jobs Button */}
-      {jobs.length > 3 && (
-        <div style={{ textAlign: 'center', marginTop: '35px' }}>
-          <Link
-            to="/all-jobs"
-            style={{
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              padding: '12px 28px',
-              borderRadius: '8px',
-              textDecoration: 'none',
-              fontWeight: 'bold',
-              fontSize: '16px',
-              display: 'inline-block'
-            }}
-          >
-            See All Jobs ({jobs.length})
-          </Link>
-        </div>
-      )}
     </div>
   );
 };
 
-export default Home;
+export default AllJobs;
