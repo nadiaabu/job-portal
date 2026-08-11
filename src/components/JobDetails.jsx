@@ -1,15 +1,39 @@
-import React from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 
 const JobDetails = () => {
-  const location = useLocation();
-  const job = location.state?.job;
+  const { id } = useParams();
+  const [job, setJob] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Render API link
+    fetch('https://job-portal-1-md06.onrender.com/jobs')
+      .then((res) => res.json())
+      .then((data) => {
+        // Find matching job by ID
+        const foundJob = data.find((item) => (item._id || item.id) === id);
+        setJob(foundJob);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching job details:', err);
+        setLoading(false);
+      });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div style={{ textAlign: 'center', padding: '60px', fontFamily: 'sans-serif' }}>
+        <h2>Loading job details...</h2>
+      </div>
+    );
+  }
 
   if (!job) {
     return (
       <div style={{ textAlign: 'center', padding: '60px', fontFamily: 'sans-serif' }}>
-        <h2>Job details not available!</h2>
-        <p style={{ color: '#64748b' }}>Please go back and select a job from the home page.</p>
+        <h2>Job details not found!</h2>
         <Link to="/" style={{ color: '#2563eb', fontWeight: 'bold', textDecoration: 'none' }}>
           ← Back to Home
         </Link>
@@ -37,7 +61,7 @@ const JobDetails = () => {
 
         <h3 style={{ color: '#1e293b', marginBottom: '10px' }}>Job Description</h3>
         <p style={{ color: '#475569', lineHeight: '1.6' }}>
-          {job.description || 'We are looking for a dedicated professional to join our dynamic team. Responsible for core development and collaborating with cross-functional teams.'}
+          {job.description || 'We are looking for a dedicated professional to join our team. Responsible for core development and collaborating with teams.'}
         </p>
 
         <button
