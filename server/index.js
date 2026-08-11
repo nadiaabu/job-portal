@@ -1,81 +1,75 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5001;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const uri = "mongodb+srv://nadiaabu2003_db_user:nadia002@cluster0.7ktk3ay.mongodb.net/jobPortalDB?retryWrites=true&w=majority&appName=Cluster0";
+// MongoDB Connection URI (Make sure DB_USER and DB_PASS are set in .env or Render Environment Variables)
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mongodb.net/?retryWrites=true&w=majority`;
 
-const jobSchema = new mongoose.Schema({
-  title: String,
-  company: String,
-  location: String,
-  salary: String
-});
-
-const Job = mongoose.model('Job', jobSchema);
-
-const seedJobs = async () => {
-  try {
-    const count = await Job.countDocuments();
-    if (count === 0) {
-      await Job.insertMany([
-        { title: "React Developer", company: "TechCorp", location: "Dhaka (Remote)", salary: "$60,000/yr" },
-        { title: "UI/UX Designer", company: "DesignStudio", location: "Chittagong", salary: "$45,000/yr" },
-        { title: "Backend Node.js Engineer", company: "CodeLab", location: "Sylhet (Hybrid)", salary: "$70,000/yr" }
-      ]);
-      console.log("Sample jobs inserted to MongoDB!");
-    }
-  } catch (error) {
-    console.error("Error seeding jobs:", error);
-  }
-};
-
-mongoose.connect(uri)
-  .then(() => {
-    console.log('MongoDB Connected Successfully!');
-    seedJobs();
-  })
-  .catch(err => console.error('MongoDB Connection Error:', err));
-
-app.get('/jobs', async (req, res) => {
-  try {
-    const jobs = await Job.find();
-    res.json(jobs);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
   }
 });
 
-app.get('/jobs/:id', async (req, res) => {
+async function run() {
   try {
-    const { id } = req.params;
-    let job = null;
+    // Database and Collection
+    const db = client.db('jobPortalDB');
+    const jobCollection = db.collection('jobs');
 
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      job = await Job.findById(id);
-    }
-
-    if (!job) {
-      const jobs = await Job.find();
-      const index = parseInt(id) - 1;
-      if (!isNaN(index) && jobs[index]) {
-        job = jobs[index];
+    // 1. GET: Fetch all jobs
+    app.get('/jobs', async (req, res) => {
+      try {
+        const jobs = await jobCollection.find().toArray();
+        res.send(jobs);
+      } catch (error) {
+        res.status(500).send({ message: 'Error fetching jobs', error });
       }
-    }
+    });
 
-    if (!job) {
-      return res.status(404).json({ message: 'Job not found' });
-    }
+    // 2. GET: Fetch single job by ID
+    app.get('/jobs/:id', async (req, res) => {
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const job = await jobCollection.findOne(query);
+        res.send(job);
+      } catch (error) {
+        res.status(500).send({ message: 'Error fetching single job details', error });
+      }
+    });
 
-    res.json(job);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    // 3. POST: Add a new job
+    app.post('/jobs', async (req, res) => {
+      try {
+        const newJob = req.body;
+        const result = await jobCollection.insertOne(newJob);
+        res.send(result);
+      } catch (error) {
+        res.status(500).send({ message: 'Failed to add job', error });
+      }
+    });
+
+    console.log("Successfully connected to MongoDB!");
+  } finally {
+    // Keep connection open
   }
+}
+run().catch(console.dir);
+
+// Root Route
+app.get('/', (req, res) => {
+  res.send('Job Portal Server is Running...');
 });
 
 app.listen(port, () => {
