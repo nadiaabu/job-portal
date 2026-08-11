@@ -28,7 +28,7 @@ const AddJob = () => {
       .then((data) => {
         if (data.insertedId || data._id) {
           alert('Job posted successfully!');
-          navigate('/'); // নতুন জব পোস্ট শেষে হোম পেজে নিয়ে যাবে
+          navigate('/');
         }
       })
       .catch((err) => console.error('Error adding job:', err));
@@ -39,10 +39,10 @@ const AddJob = () => {
       <h2 style={{ textAlign: 'center', marginBottom: '20px', color: '#1e293b' }}>Post a New Job</h2>
       
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <input type="text" name="title" placeholder="Job Title (e.g. React Developer)" value={formData.title} onChange={handleChange} required style={inputStyle} />
+        <input type="text" name="title" placeholder="Job Title" value={formData.title} onChange={handleChange} required style={inputStyle} />
         <input type="text" name="company" placeholder="Company Name" value={formData.company} onChange={handleChange} required style={inputStyle} />
-        <input type="text" name="location" placeholder="Location (e.g. Dhaka / Remote)" value={formData.location} onChange={handleChange} required style={inputStyle} />
-        <input type="text" name="salary" placeholder="Salary (e.g. $60,000/yr)" value={formData.salary} onChange={handleChange} style={inputStyle} />
+        <input type="text" name="location" placeholder="Location" value={formData.location} onChange={handleChange} required style={inputStyle} />
+        <input type="text" name="salary" placeholder="Salary" value={formData.salary} onChange={handleChange} style={inputStyle} />
         
         <select name="jobType" value={formData.jobType} onChange={handleChange} style={inputStyle}>
           <option value="Full-time">Full-time</option>

@@ -6,7 +6,6 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5001;
 
-
 app.use(cors());
 app.use(express.json());
 
@@ -22,7 +21,6 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-   
     const db = client.db('jobPortalDB');
     const jobCollection = db.collection('jobs');
 
@@ -35,7 +33,6 @@ async function run() {
       }
     });
 
-    
     app.get('/jobs/:id', async (req, res) => {
       try {
         const id = req.params.id;
@@ -59,12 +56,10 @@ async function run() {
 
     console.log("Successfully connected to MongoDB!");
   } finally {
-    
   }
 }
 run().catch(console.dir);
 
-// Root Route
 app.get('/', (req, res) => {
   res.send('Job Portal Server is Running...');
 });
