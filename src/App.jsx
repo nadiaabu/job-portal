@@ -1,20 +1,18 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './components/Home';
 import JobDetails from './components/JobDetails';
-import Footer from './components/Footer';
 
 function App() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div>
       <Navbar />
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/job/:id" element={<JobDetails />} />
-        </Routes>
-      </main>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/jobs/:id" element={<JobDetails />} />
+      </Routes>
       <Footer />
     </div>
   );
