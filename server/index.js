@@ -1,36 +1,17 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const multer = require('multer');
-const path = require('path');
-require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-
 
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://nadiaabu2003_db_user:nadia00222@cluster0.7ktk3ay.mongodb.net/job-portal?retryWrites=true&w=majority";
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-const upload = multer({ storage: storage });
-
-
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://admin:admin123@cluster0.mongodb.net/jobportal?retryWrites=true&w=majority";
-
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch((err) => console.error('MongoDB Connection Error:', err));
-
 
 const jobSchema = new mongoose.Schema({
   title: String,
@@ -43,67 +24,74 @@ const jobSchema = new mongoose.Schema({
 });
 
 const applicationSchema = new mongoose.Schema({
-  jobId: String,
-  name: String,
-  email: String,
-  resumePath: String,
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  jobId: { type: String, default: "1" },
+  resumeUrl: { type: String, default: "" },
   appliedAt: { type: Date, default: Date.now }
 });
 
-const Job = mongoose.model('Job', jobSchema);
-const Application = mongoose.model('Application', applicationSchema);
+const Job = mongoose.models.Job || mongoose.model('Job', jobSchema);
+const Application = mongoose.models.Application || mongoose.model('Application', applicationSchema);
 
-// API Routes
-// 1. Get All Jobs
 app.get('/api/jobs', async (req, res) => {
   try {
-    const jobs = await Job.find().sort({ createdAt: -1 });
-    res.json(jobs);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const jobs = await Job.find();
+    res.status(200).json(jobs);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
+app.get('/api/jobs/:id', async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).json({ message: "Job not found" });
+    res.status(200).json(job);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 app.post('/api/jobs', async (req, res) => {
   try {
     const newJob = new Job(req.body);
     await newJob.save();
     res.status(201).json(newJob);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
-
-app.post('/api/apply', upload.single('resume'), async (req, res) => {
+app.get('/api/applications', async (req, res) => {
   try {
-    const { jobId, name, email } = req.body;
-    const resumeFile = req.file;
+    const applications = await Application.find().sort({ appliedAt: -1 });
+    res.status(200).json(applications);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
-    if (!resumeFile) {
-      return res.status(400).json({ error: 'Resume file is required' });
-    }
+app.post('/api/applications', async (req, res) => {
+  try {
+    const { name, applicantName, email, applicantEmail, jobId, job_id, resumeUrl, resume } = req.body;
 
-    const newApplication = new Application({
-      jobId,
-      name,
-      email,
-      resumePath: resumeFile.path
+    const application = new Application({
+      name: name || applicantName || "Applicant",
+      email: email || applicantEmail || "no-email@example.com",
+      jobId: jobId || job_id || "1",
+      resumeUrl: resumeUrl || resume || "https://example.com/resume.pdf"
     });
 
-    await newApplication.save();
-    res.status(201).json({ message: 'Application saved to database successfully!', application: newApplication });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    await application.save();
+    return res.status(200).json({ message: "Success", application });
+  } catch (error) {
+    console.error("MongoDB Error:", error);
+    return res.status(500).json({ error: error.message });
   }
 });
 
-
-app.get('/', (req, res) => {
-  res.send('Job Portal Backend API is Running');
-});
-
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

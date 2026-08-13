@@ -1,110 +1,96 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
-
-const defaultJobs = [
-  {
-    _id: '1',
-    title: 'Backend Node.js Engineer',
-    company: 'CodeLab',
-    location: 'Sylhet (Hybrid)',
-    salary: '$70,000/yr'
-  },
-  {
-    _id: '2',
-    title: 'UI/UX Designer',
-    company: 'DesignStudio',
-    location: 'Chittagong',
-    salary: '$45,000/yr'
-  },
-  {
-    _id: '3',
-    title: 'React Developer',
-    company: 'TechCorp',
-    location: 'Dhaka (Remote)',
-    salary: '$60,000/yr'
-  }
-];
-
 const Home = () => {
-  const [jobs, setJobs] = useState(defaultJobs);
+  const [jobs, setJobs] = useState([]);
+
+  
+  const dummyJobs = [
+    {
+      id: "1",
+      _id: "1",
+      title: "Backend Node.js Engineer",
+      company: "CodeLab",
+      location: "Sylhet (Hybrid)",
+      salary: "$70,000/yr"
+    },
+    {
+      id: "2",
+      _id: "2",
+      title: "UI/UX Designer",
+      company: "DesignStudio",
+      location: "Chittagong",
+      salary: "$45,000/yr"
+    },
+    {
+      id: "3",
+      _id: "3",
+      title: "React Developer",
+      company: "TechCorp",
+      location: "Dhaka (Remote)",
+      salary: "$60,000/yr"
+    }
+  ];
 
   useEffect(() => {
-    fetch('https://job-portal-1-md06.onrender.com/jobs')
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setJobs(data);
+    const fetchJobs = async () => {
+      try {
+        const res = await fetch('https://job-portal-1-md06.onrender.com/api/jobs');
+        if (res.ok) {
+          const apiJobs = await res.json();
+          if (apiJobs && apiJobs.length > 0) {
+            setJobs(apiJobs.slice(0, 3));
+            return;
+          }
         }
-      })
-      .catch((err) => {
-        console.error('Error fetching jobs:', err);
-      });
+      } catch (err) {
+        console.log("Error fetching jobs:", err);
+      }
+      setJobs(dummyJobs);
+    };
+
+    fetchJobs();
   }, []);
 
-  const featuredJobs = jobs.slice(0, 3);
-
   return (
-    <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '20px', fontFamily: 'sans-serif' }}>
-      <div
-        style={{
-          borderRadius: '16px',
-          marginBottom: '40px',
-          height: '240px',
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          color: '#ffffff',
-          textAlign: 'center'
+    <div className="w-full px-6 md:px-12 py-6">
+      {/* Hero Banner */}
+      <div 
+        className="w-full relative rounded-xl overflow-hidden mb-10 h-64 flex items-center justify-center text-center bg-cover bg-center shadow-sm"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1200&q=80')` 
         }}
       >
-        <h1 style={{ fontSize: '36px', margin: '0 0 10px 0' }}>Find Your Dream Job!</h1>
-        <p style={{ fontSize: '16px', opacity: 0.9 }}>Discover top career opportunities today.</p>
+        <div className="text-white px-4">
+          <h1 className="text-3xl md:text-4xl font-extrabold mb-2 tracking-wide">Find Your Dream Job!</h1>
+          <p className="text-sm md:text-base text-gray-200">Discover top career opportunities today.</p>
+        </div>
       </div>
 
-      <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#1e293b' }}>
-        Latest Job Openings
-      </h2>
+      {/* Title */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl font-bold text-gray-800">Latest Job Openings</h2>
+      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' }}>
-        {featuredJobs.map((job) => (
+      {/* Job Cards Container */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mx-auto">
+        {(jobs.length > 0 ? jobs : dummyJobs).map((job) => (
           <div
-            key={job._id || job.id}
-            style={{
-              backgroundColor: '#ffffff',
-              border: '1px solid #e2e8f0',
-              borderRadius: '12px',
-              padding: '20px',
-              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between'
-            }}
+            key={job.id || job._id}
+            className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between text-center"
           >
             <div>
-              <h3 style={{ margin: '0 0 8px 0', color: '#0f172a' }}>{job.title}</h3>
-              <p style={{ color: '#2563eb', fontWeight: 'bold', margin: '0 0 10px 0' }}>{job.company}</p>
-              <p style={{ color: '#64748b', fontSize: '14px', margin: '4px 0' }}>📍 {job.location}</p>
-              {job.salary && <p style={{ color: '#64748b', fontSize: '14px', margin: '4px 0' }}>💰 {job.salary}</p>}
+              <h3 className="text-lg font-bold text-gray-800 mb-1">{job.title}</h3>
+              <p className="text-blue-600 font-medium text-sm mb-3">{job.company}</p>
+              <div className="text-gray-500 text-xs space-y-1 mb-6">
+                <p>📍 {job.location}</p>
+                <p>💰 {job.salary}</p>
+              </div>
             </div>
 
             <Link
-              to={`/jobs/${job._id || job.id}`}
-              style={{
-                display: 'block',
-                textAlign: 'center',
-                backgroundColor: '#0f172a',
-                color: '#ffffff',
-                padding: '10px 0',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontWeight: 'bold',
-                marginTop: '15px'
-              }}
+              to={`/jobs/${job.id || job._id}`}
+              className="w-full bg-[#111827] hover:bg-black text-white text-sm font-medium py-2 rounded transition"
             >
               View Details
             </Link>
@@ -112,19 +98,11 @@ const Home = () => {
         ))}
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: '35px' }}>
+      {/* See All Jobs Button */}
+      <div className="text-center mt-10">
         <Link
-          to="/all-jobs"
-          style={{
-            backgroundColor: '#2563eb',
-            color: '#ffffff',
-            padding: '12px 28px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontWeight: 'bold',
-            fontSize: '16px',
-            display: 'inline-block'
-          }}
+          to="/jobs"
+          className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-6 py-2.5 rounded-md transition shadow-sm"
         >
           See All Jobs
         </Link>
