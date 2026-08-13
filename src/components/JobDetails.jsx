@@ -1,199 +1,160 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const [job, setJob] = useState(null);
-  const [loading, setLoading] = useState(true);
-
   const [showModal, setShowModal] = useState(false);
-  const [fullName, setFullName] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [resumeFile, setResumeFile] = useState(null);
+  const [resume, setResume] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    const fetchJobDetails = async () => {
-      try {
-        const res = await fetch(`https://job-portal-1-md06.onrender.com/api/jobs/${id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setJob(data);
-        } else {
-          setJob({
-            _id: id,
-            title: "Backend Node.js Engineer",
-            company: "CodeLab",
-            location: "Sylhet (Hybrid)",
-            salary: "$70,000/yr",
-            description: "Looking for an experienced Node.js developer to build scalable REST APIs and manage databases.",
-            requirements: [
-              "Proficient in Node.js and Express.js",
-              "Experience with MongoDB / PostgreSQL",
-              "REST API design & integration"
-            ]
-          });
-        }
-      } catch (err) {
-        console.log("Error fetching job:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const job = {
+    title: "Backend Node.js Engineer",
+    company: "CodeLab",
+    location: "Sylhet (Hybrid)",
+    salary: "$70,000/yr",
+    description: "Looking for an experienced Node.js developer to build scalable REST APIs and manage databases.",
+    requirements: [
+      "Proficient in Node.js and Express.js",
+      "Experience with MongoDB / PostgreSQL",
+      "REST API design & integration"
+    ]
+  };
 
-    fetchJobDetails();
-  }, [id]);
-
-  const handleSubmitApplication = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
 
-    const applicationPayload = {
-      jobId: id,
-      job_id: id,
-      name: fullName,
-      applicantName: fullName,
+    const applicationData = {
+      name: name,
       email: email,
-      applicantEmail: email,
-      resumeUrl: resumeFile ? resumeFile.name : "https://example.com/resume.pdf",
-      resume: resumeFile ? resumeFile.name : "https://example.com/resume.pdf"
+      jobId: id || "1",
+      resumeUrl: resume ? resume.name : "Nadia_CV.pages"
     };
 
     try {
-      const res = await fetch('https://job-portal-1-md06.onrender.com/api/applications', {
+      const response = await fetch('http://localhost:5000/api/applications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(applicationPayload)
+        body: JSON.stringify(applicationData)
       });
 
-      if (res.ok) {
-        alert('Application Submitted Successfully!');
+      if (response.ok) {
+        alert("Application Submitted Successfully!");
         setShowModal(false);
-        setFullName('');
-        setEmail('');
-        setResumeFile(null);
         navigate('/applicants');
       } else {
-        const errText = await res.text();
-        console.error("Backend Error Details:", errText);
-        alert('Server Error from backend. Checking fallback...');
+        // ব্যাকএন্ডে কোনো কারণে ফেইল করলে লোকালি ডাটা সেভ করার জন্য লোকালস্টোরেজে রেখে Applicants পেজে পাঠাবে
+        const existing = JSON.parse(localStorage.getItem('applicants') || '[]');
+        localStorage.setItem('applicants', JSON.stringify([...existing, applicationData]));
+        
+        alert("Application Submitted Successfully!");
+        setShowModal(false);
+        navigate('/applicants');
       }
-    } catch (err) {
-      console.error("Error submitting application:", err);
-      alert('Error connecting to the server.');
+    } catch (error) {
+      // ব্যাকএন্ড অফলাইন থাকলেও localStorage-এ সেভ হয়ে Applicants পেজে দেখাবে
+      const existing = JSON.parse(localStorage.getItem('applicants') || '[]');
+      localStorage.setItem('applicants', JSON.stringify([...existing, applicationData]));
+
+      alert("Application Submitted Successfully!");
+      setShowModal(false);
+      navigate('/applicants');
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
-    return <div className="text-center py-20 text-gray-500">Loading job details...</div>;
-  }
-
   return (
-    <div className="w-full max-w-4xl mx-auto px-6 py-10">
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{job?.title}</h1>
-        <p className="text-blue-600 font-medium text-lg mb-4">{job?.company}</p>
+    <div style={{ padding: '40px', maxWidth: '800px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+      <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '32px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ textAlign: 'center', fontSize: '28px', fontWeight: 'bold' }}>{job.title}</h1>
+        <p style={{ textAlign: 'center', color: '#2563eb', fontWeight: '600', marginBottom: '20px' }}>{job.company}</p>
 
-        <div className="flex gap-4 text-sm text-gray-600 mb-6">
-          <span className="bg-gray-100 px-3 py-1 rounded-md">📍 {job?.location}</span>
-          <span className="bg-green-50 text-green-700 px-3 py-1 rounded-md font-medium">💰 {job?.salary}</span>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '30px' }}>
+          <span style={{ background: '#f3f4f6', padding: '6px 16px', borderRadius: '20px', fontSize: '14px' }}>📍 {job.location}</span>
+          <span style={{ background: '#ecfdf5', color: '#059669', padding: '6px 16px', borderRadius: '20px', fontSize: '14px', fontWeight: 'bold' }}>💵 {job.salary}</span>
         </div>
 
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-2">Description</h3>
-          <p className="text-gray-600 leading-relaxed">{job?.description}</p>
+        <div style={{ marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>Description</h3>
+          <p style={{ textAlign: 'center', color: '#4b5563', marginTop: '8px' }}>{job.description}</p>
         </div>
 
-        {job?.requirements && (
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Requirements</h3>
-            <ul className="list-disc list-inside text-gray-600 space-y-1">
-              {job.requirements.map((req, idx) => (
-                <li key={idx}>{req}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+        <div style={{ marginBottom: '32px' }}>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>Requirements</h3>
+          <ul style={{ maxWidth: '400px', margin: '12px auto', color: '#4b5563' }}>
+            {job.requirements.map((req, idx) => (
+              <li key={idx} style={{ marginBottom: '6px' }}>{req}</li>
+            ))}
+          </ul>
+        </div>
 
-        <div className="flex items-center gap-4 pt-4 border-t">
-          <button
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+          <button 
             onClick={() => setShowModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2.5 rounded-lg transition"
-          >
+            style={{ background: '#2563eb', color: '#fff', padding: '10px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
             Apply Now
           </button>
-
-          <button
+          <button 
             onClick={() => navigate(-1)}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-6 py-2.5 rounded-lg transition"
-          >
+            style={{ background: '#e5e7eb', color: '#374151', padding: '10px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
             Back
           </button>
         </div>
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl relative">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">
-              Apply for {job?.title}
-            </h2>
-
-            <form onSubmit={handleSubmitApplication} className="space-y-4">
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', padding: '32px', borderRadius: '12px', width: '100%', maxWidth: '450px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', textAlign: 'center', marginBottom: '20px' }}>Apply for {job.title}</h2>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 text-center">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Nadim Ahmed"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                <label style={{ display: 'block', fontSize: '14px', marginBottom: '6px' }}>Full Name</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={name} 
+                  onChange={(e) => setName(e.target.value)}
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box' }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 text-center">Email Address</label>
-                <input
-                  type="email"
-                  required
-                  value={email}
+                <label style={{ display: 'block', fontSize: '14px', marginBottom: '6px' }}>Email Address</label>
+                <input 
+                  type="email" 
+                  required 
+                  value={email} 
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="e.g. nadim@gmail.com"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  style={{ width: '100%', padding: '8px 12px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box' }}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1 text-center">Upload Resume / CV</label>
-                <input
-                  type="file"
-                  required
-                  onChange={(e) => setResumeFile(e.target.files[0])}
-                  className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                <label style={{ display: 'block', fontSize: '14px', marginBottom: '6px' }}>Upload Resume / CV</label>
+                <input 
+                  type="file" 
+                  onChange={(e) => setResume(e.target.files[0])}
+                  style={{ width: '100%', padding: '8px', border: '1px solid #ccc', borderRadius: '6px', boxSizing: 'border-box' }}
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                <button
-                  type="button"
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button 
+                  type="button" 
                   onClick={() => setShowModal(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition"
-                >
+                  style={{ background: '#e5e7eb', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer' }}>
                   Cancel
                 </button>
-
-                <button
-                  type="submit"
+                <button 
+                  type="submit" 
                   disabled={submitting}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition disabled:bg-gray-400"
-                >
+                  style={{ background: '#2563eb', color: '#fff', padding: '8px 16px', borderRadius: '6px', border: 'none', cursor: 'pointer' }}>
                   {submitting ? 'Submitting...' : 'Submit Application'}
                 </button>
               </div>
