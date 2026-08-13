@@ -1,69 +1,40 @@
-const express = require('express');
-const cors = require('cors');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-require('dotenv').config();
+const multer = require('multer');
+const path = require('path');
 
-const app = express();
-const port = process.env.PORT || 5001;
-
-app.use(cors());
-app.use(express.json());
-
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.mongodb.net/?retryWrites=true&w=majority`;
-
-const client = new MongoClient(uri, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
-async function run() {
+const upload = multer({ storage: storage });
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.post('/api/apply', upload.single('resume'), async (req, res) => {
   try {
-    const db = client.db('jobPortalDB');
-    const jobCollection = db.collection('jobs');
+    const { jobId, name, email } = req.body;
+    const resumeFile = req.file;
 
-    app.get('/jobs', async (req, res) => {
-      try {
-        const jobs = await jobCollection.find().toArray();
-        res.send(jobs);
-      } catch (error) {
-        res.status(500).send({ message: 'Error fetching jobs', error });
+    if (!resumeFile) {
+      return res.status(400).json({ success: false, message: 'Resume file is required!' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Application & Resume submitted successfully!',
+      data: {
+        jobId,
+        name,
+        email,
+        resumePath: resumeFile.path
       }
     });
 
-    app.get('/jobs/:id', async (req, res) => {
-      try {
-        const id = req.params.id;
-        const query = { _id: new ObjectId(id) };
-        const job = await jobCollection.findOne(query);
-        res.send(job);
-      } catch (error) {
-        res.status(500).send({ message: 'Error fetching single job details', error });
-      }
-    });
-
-    app.post('/jobs', async (req, res) => {
-      try {
-        const newJob = req.body;
-        const result = await jobCollection.insertOne(newJob);
-        res.send(result);
-      } catch (error) {
-        res.status(500).send({ message: 'Failed to add job', error });
-      }
-    });
-
-    console.log("Successfully connected to MongoDB!");
-  } finally {
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error' });
   }
-}
-run().catch(console.dir);
-
-app.get('/', (req, res) => {
-  res.send('Job Portal Server is Running...');
-});
-
-app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
 });
