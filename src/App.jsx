@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import AllJobs from './components/AllJobs';
@@ -11,22 +11,20 @@ import Footer from './components/Footer';
 
 function App() {
   return (
-    <Router>
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f3f4f6' }}>
-        <Navbar />
-        <div style={{ flex: 1 }}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/jobs" element={<AllJobs />} />
-            <Route path="/jobs/:id" element={<JobDetails />} />
-            <Route path="/add-job" element={<AddJob />} />
-            <Route path="/applicants" element={<Applicants />} />
-            <Route path="/login" element={<Login />} />
-          </Routes>
-        </div>
-        <Footer />
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f3f4f6' }}>
+      <Navbar />
+      <div style={{ flex: 1 }}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/jobs" element={<AllJobs />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
+          <Route path="/add-job" element={<AddJob />} />
+          <Route path="/applicants" element={<Applicants />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
       </div>
-    </Router>
+      <Footer />
+    </div>
   );
 }
 
