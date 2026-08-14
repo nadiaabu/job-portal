@@ -4,7 +4,7 @@ const Applicants = () => {
   const [applicants, setApplicants] = useState([]);
 
   useEffect(() => {
-    // লোকালস্টোরেজ থেকে সাবমিট করা ডাটা লোড করা হচ্ছে
+   
     const savedApplicants = JSON.parse(localStorage.getItem('applicants') || '[]');
     setApplicants(savedApplicants);
   }, []);
